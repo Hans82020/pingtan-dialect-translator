@@ -1,6 +1,7 @@
 import localData from '../../data/phrases.json'
 
 let cache = null
+let cacheUrl = ''   // 缓存对应的远程 URL，remoteUrl 变化时重建缓存
 
 function merge(local, remote) {
   const map = new Map(local.map(p => [p.id, p]))
@@ -9,7 +10,7 @@ function merge(local, remote) {
 }
 
 export async function loadPhrases({ refresh = false, remoteUrl = '' } = {}) {
-  if (cache && !refresh) return cache
+  if (cache && !refresh && remoteUrl === cacheUrl) return cache
   let list = [...localData]
   if (remoteUrl) {
     try {
@@ -21,5 +22,6 @@ export async function loadPhrases({ refresh = false, remoteUrl = '' } = {}) {
     } catch { /* 远程失败静默用本地 */ }
   }
   cache = list
+  cacheUrl = remoteUrl
   return list
 }

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <circle cx="256" cy="256" r="256" fill="#1d3557"/>
+  <circle cx="256" cy="256" r="200" fill="#e63946"/>
+  <text x="256" y="310" font-size="220" font-family="serif" font-weight="bold" fill="#ffffff" text-anchor="middle">平</text>
+  <path d="M80 430 Q156 392 232 430 T384 430 T504 430" stroke="#ffffff" stroke-width="16" fill="none" opacity="0.85"/>
+</svg>

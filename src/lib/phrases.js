@@ -13,7 +13,7 @@ export async function loadPhrases({ refresh = false, remoteUrl = '' } = {}) {
   let list = [...localData]
   if (remoteUrl) {
     try {
-      const r = await fetch(remoteUrl, { cache: 'no-store' })
+      const r = await fetch(remoteUrl, { cache: 'no-store', signal: AbortSignal.timeout(5000) })
       if (r.ok) {
         const remote = await r.json()
         if (Array.isArray(remote)) list = merge(list, remote)

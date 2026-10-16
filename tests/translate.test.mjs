@@ -28,3 +28,6 @@ test('缺字段报 BAD_MODEL_OUTPUT', async () => {
 test('缺 API Key 报 NO_API_KEY', async () => {
   await assert.rejects(() => chatJson('x', { apiKey: '', fetchImpl: okFetch(GOOD) }), /NO_API_KEY/)
 })
+test('畸形 JSON 报 BAD_MODEL_OUTPUT', async () => {
+  await assert.rejects(() => chatJson('x', { apiKey: 'k', fetchImpl: okFetch('{invalid}') }), /BAD_MODEL_OUTPUT/)
+})

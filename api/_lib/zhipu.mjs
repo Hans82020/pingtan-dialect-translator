@@ -12,7 +12,8 @@ export const SYSTEM_PROMPT = `你是平潭话（闽东语侯官片，近福清�
 function extractJson(s) {
   const m = String(s).match(/\{[\s\S]*\}/)
   if (!m) throw new ApiError('BAD_MODEL_OUTPUT', 502, '模型未返回 JSON')
-  return JSON.parse(m[0])
+  try { return JSON.parse(m[0]) }
+  catch { throw new ApiError('BAD_MODEL_OUTPUT', 502, '模型输出的 JSON 无法解析') }
 }
 
 export function parseResult(raw) {
@@ -28,6 +29,7 @@ export async function chatJson(text, { apiKey, fetchImpl = fetch } = {}) {
   try {
     r = await fetchImpl('https://open.bigmodel.cn/api/paas/v4/chat/completions', {
       method: 'POST',
+      signal: AbortSignal.timeout(15000),
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: 'glm-4-flash', temperature: 0.3,

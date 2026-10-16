@@ -18,9 +18,12 @@ const showPopup = ref(false)  // 弹层开关与词条分离，避免 vant 关�
 onMounted(async () => { list.value = await loadPhrases({ remoteUrl: '' }) })
 
 const cats = computed(() => ['all', ...new Set(list.value.map(p => p.category))])
-const filtered = computed(() => list.value.filter(p =>
-  (activeCat.value === 'all' || p.category === activeCat.value) &&
-  (!keyword.value || (p.zh + p.pt_hanzi).includes(keyword.value))))
+const filtered = computed(() => {
+  const kw = keyword.value.trim()
+  return list.value.filter(p =>
+    (activeCat.value === 'all' || p.category === activeCat.value) &&
+    (!kw || (p.zh + p.pt_hanzi).includes(kw)))
+})
 </script>
 
 <template>
@@ -35,7 +38,8 @@ const filtered = computed(() => list.value.filter(p =>
     </van-cell>
     <van-empty v-if="!filtered.length" description="没有匹配的词条" />
     <van-popup v-model:show="showPopup" position="bottom" round style="padding-bottom:12px">
-      <ResultCard v-if="active" :entry="active" />
+      <!-- :key 按词条重建卡片，避免 ResultCard 本地收藏态跨弹层复用串词条 -->
+      <ResultCard v-if="active" :key="active.id" :entry="active" />
     </van-popup>
   </div>
 </template>

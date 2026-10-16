@@ -14,7 +14,9 @@ export async function ttsMp3(text) {
     const stream = r.audioStream || r
     const chunks = []
     for await (const c of stream) chunks.push(c)
-    return Buffer.concat(chunks)
+    const buf = Buffer.concat(chunks)
+    if (!buf.length) throw new ApiError('TTS_UPSTREAM', 503, '语音合成暂不可用，请稍后再试')
+    return buf
   } catch (e) {
     throw new ApiError('TTS_UPSTREAM', 503, '语音合成暂不可用，请稍后再试')
   } finally {

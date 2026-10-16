@@ -58,6 +58,7 @@ async function copy() {
     <template v-if="mandarin">
       <div class="label">普通话</div>
       <div class="hanzi">{{ mandarin }}</div>
+      <div class="sub" style="color:#e6a23c">实验功能：识别结果可能不准确</div>
       <van-button size="small" icon="volume-o" :loading="playing" @click="play">朗读</van-button>
     </template>
     <template v-else>

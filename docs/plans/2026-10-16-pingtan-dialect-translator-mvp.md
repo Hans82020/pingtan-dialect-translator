@@ -1561,6 +1561,8 @@ git commit -m "fix: 真机测试问题修复"
 
 ### Task 15: 部署到 Vercel
 
+> **部署前注意（Task 7 评审结论）**：msedge-tts 2.1.0 的 `preinstall: npx only-allow pnpm` 脚本在 npm <11.6（Vercel 构建镜像常用 npm 10.x）下执行 `npm install` 会失败。若 Vercel 构建报该错误：在 Vercel 项目设置的 Install Command 改为 `npm install --ignore-scripts`（sharp/esbuild 二进制走 optionalDependencies 不受影响），或改用 pnpm 安装。
+
 - [ ] **Step 1: 本地构建已通过（Task 13）后安装 CLI**
 
 运行：`npm install -g vercel`

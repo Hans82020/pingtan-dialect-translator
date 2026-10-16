@@ -21,6 +21,8 @@ test('转写调用携带 wav 格式与对应 prompt', async () => {
   assert.equal(r, '你在吃什么')
   assert.ok(captured.url.includes('dashscope.aliyuncs.com'))
   assert.equal(captured.body.messages[0].content, PROMPTS.pingtan)
+  assert.equal(captured.body.model, 'qwen3.8-omni-flash')
+  assert.ok(captured.body.messages[1].content[0].input_audio.data.startsWith('data:audio/wav;base64,'))
   assert.equal(captured.body.messages[1].content[0].input_audio.format, 'wav')
 })
 test('429 映射 QUOTA', async () => {

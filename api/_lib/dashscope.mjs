@@ -30,10 +30,10 @@ export async function transcribe({ audioBase64, mime }, mode, { apiKey, fetchImp
       signal: AbortSignal.timeout(30000),
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
       body: JSON.stringify({
-        model: 'qwen2-audio-instruct',
+        model: 'qwen3.8-omni-flash',   // qwen2-audio 系列已下线，改用 Qwen-Omni（音频理解+指令跟随）
         messages: [
           { role: 'system', content: PROMPTS[mode] },
-          { role: 'user', content: [{ type: 'input_audio', input_audio: { data: audioBase64, format } }] }
+          { role: 'user', content: [{ type: 'input_audio', input_audio: { data: `data:${mime};base64,${audioBase64}`, format } }] }
         ]
       })
     })

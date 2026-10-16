@@ -18,6 +18,7 @@ export async function ttsMp3(text) {
     if (!buf.length) throw new ApiError('TTS_UPSTREAM', 503, '语音合成暂不可用，请稍后再试')
     return buf
   } catch (e) {
+    console.error('[tts] upstream error:', e?.message || e)
     throw new ApiError('TTS_UPSTREAM', 503, '语音合成暂不可用，请稍后再试')
   } finally {
     tts.close()

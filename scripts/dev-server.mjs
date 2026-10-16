@@ -28,4 +28,4 @@ http.createServer(async (req, res) => {
   const h = routes[req.url.split('?')[0]]
   if (!h) { res.statusCode = 404; return res.end('not found') }
   try { await h(req, res) } catch (e) { res.statusCode = 500; res.end(String(e)) }
-}).listen(8787, () => console.log('API dev server: http://localhost:8787'))
+}).listen(8787, '127.0.0.1', () => console.log('API dev server: http://localhost:8787'))

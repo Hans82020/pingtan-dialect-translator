@@ -27,6 +27,7 @@ export async function transcribe({ audioBase64, mime }, mode, { apiKey, fetchImp
   try {
     r = await fetchImpl(URL_, {
       method: 'POST',
+      signal: AbortSignal.timeout(30000),
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
       body: JSON.stringify({
         model: 'qwen2-audio-instruct',

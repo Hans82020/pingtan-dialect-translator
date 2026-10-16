@@ -24,7 +24,10 @@ export async function postJSON(url, data, retries = 1) {
       }
       throw new ApiError('BAD_RESPONSE', r.status, (await r.text()).slice(0, 120))
     } catch (e) {
-      last = e.name === 'AbortError' ? new ApiError('TIMEOUT', 0, '请求超时，请重试或改用打字') : e
+      if (e instanceof ApiError && e.key !== 'TIMEOUT') throw e
+      last = e.name === 'AbortError' ? new ApiError('TIMEOUT', 0, '请求超时，请重试或改用打字')
+        : e instanceof ApiError ? e
+        : new ApiError('NETWORK', 0, '网络异常，请检查网络后重试')
     }
   }
   throw last

@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url'
 export const CATEGORIES = ['greeting', 'daily', 'food', 'shopping', 'transport',
   'emergency', 'weather', 'family', 'numbers', 'other']
 export const TONES = ['阴平', '阳平', '阴上', '阳上', '阴去', '阳去', '阴入', '阳入']
+export const AUDIO_EXTS = ['.mp3', '.wav', '.m4a']
 
 export function validatePhrases(list, { audioDir = 'public' } = {}) {
   const errors = [], warnings = [], seen = new Set()
@@ -20,8 +21,20 @@ export function validatePhrases(list, { audioDir = 'public' } = {}) {
       if (p[k] != null && typeof p[k] !== 'string') errors.push(`${at}: ${k} 应为字符串或 null`)
     if (p.tones) for (const t of String(p.tones).split('-'))
       if (!TONES.includes(t)) errors.push(`${at}: 声调非法 ${t}`)
+    if (p.tones && p.pt_rom) {
+      const toneCount = String(p.tones).split('-').filter(Boolean).length
+      const syllableCount = String(p.pt_rom).trim().split(/\s+/).filter(Boolean).length
+      if (toneCount !== syllableCount)
+        errors.push(`${at}: 声调数(${toneCount})与注音音节数(${syllableCount})不一致`)
+    }
     if (p.audio) {
-      if (!fs.existsSync(path.join(audioDir, p.audio))) errors.push(`${at}: 音频文件不存在 ${p.audio}`)
+      const audioPath = path.join(audioDir, p.audio)
+      let stat = null
+      try { stat = fs.statSync(audioPath) } catch { /* 不存在 */ }
+      const ext = path.extname(audioPath).toLowerCase()
+      if (!stat || !stat.isFile()) errors.push(`${at}: 音频文件不存在或不是文件 ${p.audio}`)
+      else if (!AUDIO_EXTS.includes(ext))
+        errors.push(`${at}: 音频扩展名不支持 ${p.audio}（仅限 ${AUDIO_EXTS.join('/')}）`)
     } else warnings.push(`${at}: 未录音`)
   })
   return { errors, warnings }

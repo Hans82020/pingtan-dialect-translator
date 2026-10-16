@@ -1,4 +1,4 @@
-import { ApiError } from './http.mjs'
+import { ApiError } from './errors.mjs'
 
 const URL_ = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'
 
@@ -20,15 +20,14 @@ export function parseText(content) {
 }
 
 export async function transcribe({ audioBase64, mime }, mode, { apiKey, fetchImpl = fetch } = {}) {
-  const key = apiKey || process.env.DASHSCOPE_API_KEY
-  if (!key) throw new ApiError('NO_API_KEY', 500, '未配置 DASHSCOPE_API_KEY')
+  if (!apiKey) throw new ApiError('NO_API_KEY', 500, '未配置 DASHSCOPE_API_KEY')
   const format = fmtOf(mime)
   let r
   try {
     r = await fetchImpl(URL_, {
       method: 'POST',
-      signal: AbortSignal.timeout(30000),
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+      signal: AbortSignal.timeout(25000),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: 'qwen3.8-omni-flash',   // qwen2-audio 系列已下线，改用 Qwen-Omni（音频理解+指令跟随）
         messages: [

@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { showToast, showLoadingToast, closeToast } from 'vant'
 import MicBanner from '../components/MicBanner.vue'
+import PwaBanner from '../components/PwaBanner.vue'
 import RecordButton from '../components/RecordButton.vue'
 import ResultCard from '../components/ResultCard.vue'
 import { settings } from '../store/settings.js'
@@ -77,6 +78,7 @@ function msgOf(e) {
 <template>
   <div class="page">
     <MicBanner />
+    <PwaBanner />
     <van-radio-group v-model="mode" direction="horizontal" style="justify-content:center;padding:8px">
       <van-radio name="zh2pt">普通话 → 平潭话</van-radio>
       <van-radio name="pt2zh">平潭话 → 普通话</van-radio>

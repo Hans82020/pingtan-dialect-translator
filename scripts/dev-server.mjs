@@ -10,12 +10,14 @@ if (fs.existsSync(envFile)) {
   }
 }
 
+// EdgeOne Pages Node Functions 格式：default 导出 onRequest({ request, env })，返回 Web Response。
+// 本地用适配器把 Node req/res 转成 Web Request/Response，模拟线上运行时。
 const routes = {}
 for (const [route, file] of [
-  ['/api/translate', '../api/translate.js'],
-  ['/api/asr', '../api/asr.js'],
-  ['/api/audio', '../api/audio.js'],
-  ['/api/tts', '../api/tts.js']
+  ['/api/translate', '../node-functions/api/translate.js'],
+  ['/api/asr', '../node-functions/api/asr.js'],
+  ['/api/audio', '../node-functions/api/audio.js'],
+  ['/api/tts', '../node-functions/api/tts.js']
 ]) {
   try {
     routes[route] = (await import(file)).default
@@ -24,8 +26,31 @@ for (const [route, file] of [
   }
 }
 
+function nodeReqToRequest(req) {
+  const headers = new Headers()
+  for (const [k, v] of Object.entries(req.headers)) headers.set(k, Array.isArray(v) ? v.join(',') : String(v))
+  return new Request(`http://127.0.0.1:8787${req.url}`, {
+    method: req.method,
+    headers,
+    body: req.method === 'GET' || req.method === 'HEAD' ? undefined : req,
+    duplex: 'half'
+  })
+}
+
+async function writeResponse(res, resp) {
+  const headers = {}
+  resp.headers.forEach((v, k) => { headers[k] = v })
+  res.writeHead(resp.status, headers)
+  res.end(Buffer.from(await resp.arrayBuffer()))
+}
+
 http.createServer(async (req, res) => {
-  const h = routes[req.url.split('?')[0]]
-  if (!h) { res.statusCode = 404; return res.end('not found') }
-  try { await h(req, res) } catch (e) { res.statusCode = 500; res.end(String(e)) }
+  const handler = routes[req.url.split('?')[0]]
+  if (!handler) { res.statusCode = 404; return res.end('not found') }
+  try {
+    await writeResponse(res, await handler({ request: nodeReqToRequest(req), env: process.env }))
+  } catch (e) {
+    res.statusCode = 500
+    res.end(String(e?.stack || e))
+  }
 }).listen(8787, '127.0.0.1', () => console.log('API dev server: http://localhost:8787'))

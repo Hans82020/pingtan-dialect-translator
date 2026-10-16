@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { chatJson } from '../api/_lib/zhipu.mjs'
+import { chatJson } from '../node-functions/_lib/zhipu.mjs'
 
 const okFetch = content => async () => ({
   ok: true, status: 200,

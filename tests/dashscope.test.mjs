@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { transcribe, parseText, PROMPTS } from '../api/_lib/dashscope.mjs'
+import { transcribe, parseText, PROMPTS } from '../node-functions/_lib/dashscope.mjs'
 
 test('parseText 空结果 → NO_SPEECH', () => {
   assert.throws(() => parseText(''), /NO_SPEECH/)

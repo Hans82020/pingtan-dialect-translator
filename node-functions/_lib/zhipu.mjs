@@ -1,4 +1,4 @@
-import { ApiError } from './http.mjs'
+import { ApiError } from './errors.mjs'
 
 export const SYSTEM_PROMPT = `你是平潭话（闽东语侯官片，近福清话）专家。把用户给的普通话句子翻译成平潭话口语。
 要求：

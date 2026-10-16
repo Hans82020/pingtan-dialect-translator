@@ -1,5 +1,5 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts'
-import { ApiError } from './http.mjs'
+import { ApiError } from './errors.mjs'
 
 export function escapeSsml(s) {
   return String(s).replace(/[&<>"']/g, c =>

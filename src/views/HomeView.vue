@@ -25,20 +25,26 @@ async function handleText(raw) {
   busy.value = true; errMsg.value = ''; result.value = null
   showLoadingToast({ message: '翻译中…', forbidClick: true, duration: 0 })
   try {
-    const phrases = await loadPhrases({ remoteUrl: settings.remotePhraseUrl })
-    if (mode.value === 'zh2pt') {
-      const hit = matchPhrase(phrases, input)
-      if (hit) { result.value = { entry: hit.entry, fuzzy: hit.fuzzy } }
-      else { result.value = { llm: await postJSON('/api/translate', { text: input }) } }
-    } else {
-      result.value = { mandarin: input }   // 方言文字兜底：直接当作普通话展示
-    }
+    await translate(input)
   } catch (e) { errMsg.value = msgOf(e) }
   finally { busy.value = false; closeToast() }
 }
 
+// 供语音流程复用：调用方自行管理 busy 与 toast
+async function translate(input) {
+  const phrases = await loadPhrases({ remoteUrl: settings.remotePhraseUrl })
+  if (mode.value === 'zh2pt') {
+    const hit = matchPhrase(phrases, input)
+    if (hit) { result.value = { entry: hit.entry, fuzzy: hit.fuzzy } }
+    else { result.value = { llm: await postJSON('/api/translate', { text: input }) } }
+  } else {
+    result.value = { mandarin: input }   // 方言文字兜底：直接当作普通话展示
+  }
+}
+
 let rec = null
 async function onRecStart() {
+  if (busy.value) return
   errMsg.value = ''; result.value = null
   try { rec = await openRecorder(ms => { if (ms > 29500) onRecEnd() }) }
   catch (e) { errMsg.value = e.message }
@@ -48,14 +54,18 @@ async function onRecEnd() {
   const r = rec; rec = null
   try {
     const blob = await r.stop()
-    busy.value = true
+    busy.value = true; errMsg.value = ''; result.value = null
     showLoadingToast({ message: '识别中…', forbidClick: true, duration: 0 })
     const api = mode.value === 'zh2pt' ? '/api/asr' : '/api/audio'
     const { text: heard } = await postAudio(api, blob)
     text.value = heard
-    await handleText(heard)
+    await translate(heard)
   } catch (e) { errMsg.value = msgOf(e) }
   finally { busy.value = false; closeToast() }
+}
+function onRecCancel() {
+  if (!rec) return
+  rec.cancel(); rec = null
 }
 function msgOf(e) {
   if (e instanceof ApiError && e.key === 'QUOTA') return 'AI 免费额度已用尽，请联系维护者充值或稍后再试'
@@ -73,7 +83,7 @@ function msgOf(e) {
     </van-radio-group>
 
     <template v-if="micOK && (mode === 'zh2pt' || dialectOn)">
-      <RecordButton @start="onRecStart" @end="onRecEnd" />
+      <RecordButton @start="onRecStart" @end="onRecEnd" @cancel="onRecCancel" />
     </template>
     <van-notice-bar v-else-if="mode === 'pt2zh' && !dialectOn" wrapable :scrollable="false"
       text="「平潭话语音识别」为实验功能，请在设置页开启后使用；可先在下方输入方言文字。" />

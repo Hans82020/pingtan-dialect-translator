@@ -20,13 +20,19 @@ function up() {
   pressing.value = false
   emit('end', elapsed.value)
 }
+function cancel() {
+  if (!pressing.value) return
+  clearInterval(timer)
+  pressing.value = false
+  emit('cancel')
+}
 onBeforeUnmount(() => clearInterval(timer))
 </script>
 
 <template>
   <div class="rec-wrap">
     <van-button round type="danger" size="large" class="rec-btn" :class="{ active: pressing }"
-      @touchstart.prevent="down" @touchend.prevent="up" @touchcancel="up"
+      @touchstart.prevent="down" @touchend.prevent="up" @touchcancel="cancel"
       @mousedown="down" @mouseup="up" @mouseleave="pressing && up()">
       {{ pressing ? `松开结束 ${elapsed.toFixed(1)}s` : '按住 说话' }}
     </van-button>

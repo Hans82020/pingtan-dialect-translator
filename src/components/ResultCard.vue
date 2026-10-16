@@ -20,21 +20,30 @@ const audio = computed(() => (props.entry?.audio ? '/' + props.entry.audio : '')
 const lowConf = computed(() => props.llm?.confidence === 'low' || props.fuzzy)
 
 const playing = ref(false)
+let currentAudio = null
 async function play() {
+  if (playing.value) return
+  currentAudio?.pause()
   try {
     playing.value = true
     if (audio.value) {
-      await new Audio(audio.value).play()
+      currentAudio = new Audio(audio.value)
+      await currentAudio.play()
     } else if (props.mandarin) {
       const url = await fetchTTS(props.mandarin)
-      await new Audio(url).play()
+      currentAudio = new Audio(url)
+      currentAudio.addEventListener('ended', () => URL.revokeObjectURL(url), { once: true })
+      currentAudio.addEventListener('error', () => URL.revokeObjectURL(url), { once: true })
+      await currentAudio.play()
     }
   } catch { showToast('播放失败，请重试') } finally { playing.value = false }
 }
 
 const favId = computed(() => props.entry?.id || null)
+const favOn = ref(favId.value ? isFav(favId.value) : false)
 function onFav() {
-  showToast(toggleFav(favId.value) ? '已收藏' : '已取消收藏')
+  favOn.value = toggleFav(favId.value)
+  showToast(favOn.value ? '已收藏' : '已取消收藏')
 }
 async function copy() {
   const t = [hanzi.value, buc.value, rom.value].filter(Boolean).join('\n') || props.mandarin
@@ -57,12 +66,12 @@ async function copy() {
       <div v-if="buc" class="sub">平话字：{{ buc }}</div>
       <div v-if="rom" class="sub">拼音：{{ rom }}</div>
       <div v-if="tones" class="sub">声调：{{ tones }}</div>
-      <van-button size="small" icon="volume-o" :disabled="!audio" @click="play">
+      <van-button size="small" icon="volume-o" :disabled="!audio" :loading="playing" @click="play">
         {{ audio ? '播放录音' : '暂无录音' }}
       </van-button>
     </template>
     <van-button size="small" icon="records" @click="copy">复制</van-button>
-    <van-button v-if="favId" size="small" :icon="isFav(favId) ? 'star' : 'star-o'" @click="onFav">收藏</van-button>
+    <van-button v-if="favId" size="small" :icon="favOn ? 'star' : 'star-o'" @click="onFav">收藏</van-button>
   </div>
 </template>
 

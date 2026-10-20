@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/pingtan-dialect-translator/sw.js', { scope: '/pingtan-dialect-translator/' })})}

@@ -4,3 +4,9 @@ dist/
 !.env.local.example
 .vercel/
 .vercel
+
+# Tencent Cloud EdgeOne
+.env
+.edgeone/*
+.tef_dist/*
+  
